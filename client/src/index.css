@@ -1,0 +1,53 @@
+@import url('https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins&family=Fjalla+One:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+@import "tailwindcss";
+
+@theme {
+  /* This creates the .font-roboto utility */
+  --font-poppins: "Poppins", ui-sans-serif, system-ui, sans-serif;
+  --font-pacifico: "Pacifico", ui-sans-serif, system-ui, sans-serif;
+  --font-avatar: "Fjalla One", ui-sans-serif, system-ui, sans-serif;
+}
+
+html, body {
+   overscroll-behavior: none;
+   height: 100%;
+}
+
+html, body, #root {
+   height: 100%;
+   overscroll-behavior: none;
+   background-color: #000000;
+}
+
+
+
+
+.scrollbar {
+  overflow: auto; /* only show scrollbar when needed */
+}
+
+/* Chrome, Edge, Safari */
+.scrollbar::-webkit-scrollbar {
+  width: 10px;
+}
+
+.scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar::-webkit-scrollbar-thumb {
+  background-color: #494949;
+  border-radius: 9999px;
+}
+
+.scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #575757;
+}
+
+/* Firefox */
+.scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #676767 transparent;
+}
+
