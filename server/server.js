@@ -20,7 +20,10 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors({
-   origin: process.env.CLIENT_URL,
+   origin: [
+      "http://localhost:5173",
+      "https://linked-5ivk.onrender.com"
+   ],
    credentials: true
 }));
 
@@ -51,7 +54,10 @@ const server = http.createServer(app);
 // Attach Socket.IO
 const io = new Server(server, {
    cors: {
-      origin: process.env.CLIENT_URL,
+      origin: [
+         "http://localhost:5173",
+         "https://linked-5ivk.onrender.com"
+      ],
       credentials: true
    }
 })
