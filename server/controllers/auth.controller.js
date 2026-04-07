@@ -120,6 +120,8 @@ export const logout = (req, res) => {
    // Replace with a expired cookie
    res.cookie("token", "", {
       httpOnly: true,
+      secure: true,
+      sameSite: "none",
       expires: new Date(0)
    });
 
