@@ -1,7 +1,6 @@
 import { io } from "socket.io-client";
 
-export const socket = io(
-   "http://10.162.78.231:5000", {
-   withCredentials: true,
-   autoConnect: false
+export const socket = io(import.meta.env.VITE_API_URL, {
+  withCredentials: true,
+  autoConnect: false
 });
