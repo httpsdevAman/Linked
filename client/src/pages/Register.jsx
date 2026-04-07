@@ -52,7 +52,7 @@ const Register = () => {
   };
 
   return (
-    <div className="h-dvh bg-[url(assets/doodle.jpg)] bg-cover bg-center bg-no-repeat flex items-center justify-center px-4 overflow-hidden overscroll-none">
+    <div className="h-dvh bg-[url(/assets/doodle.jpg)] bg-cover bg-center bg-no-repeat flex items-center justify-center px-4 overflow-hidden overscroll-none">
       <div className="fixed inset-0 bg-black/80"></div>
 
       <div className="relative w-full max-w-sm bg-[#050505] border rounded-tl-2xl rounded-br-2xl border-zinc-800 px-8 py-8">

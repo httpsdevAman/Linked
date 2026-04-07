@@ -621,7 +621,7 @@ const Chat = () => {
          </div>
 
          {/* Right Side */}
-         <div className={`bg-[url(assets/doodle.jpg)] bg-cover bg-center bg-no-repeat absolute md:relative top-0 right-0 h-full border border-zinc-800 text-white flex flex-col w-full md:flex-1 md:min-w-0 overflow-hidden
+         <div className={`bg-[url(/assets/doodle.jpg)] bg-cover bg-center bg-no-repeat absolute md:relative top-0 right-0 h-full border border-zinc-800 text-white flex flex-col w-full md:flex-1 md:min-w-0 overflow-hidden
    transform transition-transform duration-300 ease-in-out
    ${activConv ? "translate-x-0" : "translate-x-full md:translate-x-0"} z-10`}>
             <div className="absolute inset-0 bg-black/80 z-0" />
