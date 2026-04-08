@@ -485,8 +485,14 @@ const Chat = () => {
       const handleReceive = (message) => {
          // Update messages if active
          if (message.conversation === activConv) {
-            if (prev.some(m => m._id === message._id)) return prev; // Skip duplicate (Optimistic Message)
-            setMessages(prev => [...prev, message]);
+            setMessages(prev => {
+               const optimistic = prev.findLast(m => m._id.startsWith("temp-") && m.sender._id === user._id);
+               if (optimistic && message.sender._id === user._id) {
+                  return prev.map(m => m._id === optimistic._id ? { ...message, _id: optimistic._id } : m);
+               }
+               if (prev.some(m => m._id === message._id)) return prev;
+               return [...prev, message];
+            });
          }
 
          // Update sidebar

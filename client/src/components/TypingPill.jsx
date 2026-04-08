@@ -18,7 +18,7 @@ const TypingPill = ({ name, isLeaving, time }) => (
       `}</style>
       <div style={{ maxHeight: isLeaving ? "0px" : "100px", overflow: "hidden", transition: isLeaving ? "max-height 300ms ease 200ms" : "none" }}>
          <div
-            className="flex mt-3 mb-3 items-end gap-2.5 w-full flex-row"
+            className="flex mb-3 items-end gap-2.5 w-full flex-row"
             style={{ minHeight: "60px", animation: isLeaving ? "slideOutLeft 200ms ease-in forwards" : "slideInLeft 300ms ease-out forwards" }}
          >
             <Avatar name={name} size={35} border={false} />
