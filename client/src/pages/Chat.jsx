@@ -282,22 +282,38 @@ const Chat = () => {
 
    const handleSend = async () => {
       if (!currMessage.trim()) return;
+
+      const messageContent = currMessage;
+      setcurrMessage(""); // Clear immediately
+
+      const optimisticMsg = {
+         _id: `temp-${Date.now()}`,
+         content: messageContent,
+         sender: { _id: user._id, name: user.name },
+         conversation: activConv,
+         createdAt: new Date().toISOString(),
+      };
+      setMessages(prev => [...prev, optimisticMsg]); // Show immediately
+
       try {
          setActiveSend(true);
-         setTimeout(() => {
-            setActiveSend(false);
-         }, 150);
+         setTimeout(() => setActiveSend(false), 150);
 
-         const res = await sendMessage({ convID: activConv, content: currMessage });
+         const res = await sendMessage({ convID: activConv, content: messageContent });
 
-         // Socket is handling this otherwise sender will get two messages ... 
-         // setMessages(prev => [...prev, res.data]);
+         // Replace optimistic with real message
+         // setMessages(prev => prev.map(m => m._id === optimisticMsg._id ? res.data : m));
+
          setConversations(prev =>
-            prev.map(conv => conv._id === activConv ? { ...conv, lastMessage: res.data, updatedAt: res.data.createdAt } : conv)
+            prev.map(conv =>
+               conv._id === activConv
+                  ? { ...conv, lastMessage: res.data, updatedAt: res.data.createdAt }
+                  : conv
+            )
          );
-         setcurrMessage("");
-
       } catch (error) {
+         setMessages(prev => prev.filter(m => m._id !== optimisticMsg._id));
+         setcurrMessage(messageContent); // Restore on failure
          console.error(error.response?.data || error.message);
       }
    };
@@ -469,6 +485,7 @@ const Chat = () => {
       const handleReceive = (message) => {
          // Update messages if active
          if (message.conversation === activConv) {
+            if (prev.some(m => m._id === message._id)) return prev; // Skip duplicate (Optimistic Message)
             setMessages(prev => [...prev, message]);
          }
 
