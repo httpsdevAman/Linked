@@ -615,7 +615,7 @@ const Chat = () => {
 
             {/* Search + Menu */}
             <div className="w-full h-15 mt-2 mb-1.4 border-zinc-500 flex items-center px-3">
-               <div ref={menuRef}>
+               <div ref={menuRef} className="relative z-30">
                   <img
                      src="/assets/menu.svg"
                      onClick={() => toggleMenu(!menu)}
