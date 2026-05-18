@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, use } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useAuth } from "../context/AuthContext";
 import { createConversation, getMessages, sendMessage, getConversations, getUsers, getOnlineUsers } from "../services/auth";
 import { socket } from "../services/socket";
@@ -257,6 +257,27 @@ const Chat = () => {
    const typingRef = useRef(false);             // Monitors if user is typing
    const typingTimeoutRef = useRef(null);       // Clear Timout Key-Down
    const [typingUsers, setTypingUsers] = useState(new Set());
+   const chatContainerRef = useRef(null);
+
+   // Track visual viewport height to handle mobile keyboard open/close
+   const [viewportHeight, setViewportHeight] = useState(window.visualViewport?.height || window.innerHeight);
+
+   useEffect(() => {
+      const vv = window.visualViewport;
+      if (!vv) return;
+
+      const handleResize = () => {
+         setViewportHeight(vv.height);
+      };
+
+      vv.addEventListener("resize", handleResize);
+      vv.addEventListener("scroll", handleResize);
+
+      return () => {
+         vv.removeEventListener("resize", handleResize);
+         vv.removeEventListener("scroll", handleResize);
+      };
+   }, []);
 
    // Get name from userId
    const getUserNameById = (userId) => {
@@ -280,11 +301,16 @@ const Chat = () => {
       setLoadingMsgs(false);
    };
 
-   const handleSend = async () => {
+   const handleSend = useCallback(async () => {
       if (!currMessage.trim()) return;
 
       const messageContent = currMessage;
       setcurrMessage(""); // Clear immediately
+
+      // Re-focus input to keep mobile keyboard open
+      requestAnimationFrame(() => {
+         inputRef.current?.focus();
+      });
 
       const optimisticMsg = {
          _id: `temp-${Date.now()}`,
@@ -316,7 +342,7 @@ const Chat = () => {
          setcurrMessage(messageContent); // Restore on failure
          console.error(error.response?.data || error.message);
       }
-   };
+   }, [currMessage, activConv, user]);
 
    const handleKeyDown = (e) => {
       if (e.key === "Enter" && !e.shiftKey) {
@@ -573,17 +599,22 @@ const Chat = () => {
 
 
    return (
-      <div className="flex relative h-dvh overflow-hidden">
+      <div
+         ref={chatContainerRef}
+         className="flex relative overflow-hidden"
+         style={{ height: `${viewportHeight}px` }}
+      >
          {/* Left Sidebar */}
          <div className={`absolute md:relative top-0 left-0 h-full border border-zinc-800 text-white bg-[#262624] flex flex-col w-full md:w-[30%] transform transition-transform duration-300 ease-in-out
-         ${activConv ? "-translate-x-full md:translate-x-0" : "translate-x-0"} z-20`}>
+         ${activConv ? "-translate-x-full md:translate-x-0" : "translate-x-0"} z-20`}
+         style={{ touchAction: "manipulation" }}>
 
             <div className="text-7xl border-b text-center border-b-zinc-700 font-pacifico bg-linear-to-r from-green-400 via-blue-500 to-purple-600 p-4 bg-clip-text text-transparent select-none">
                Linked.
             </div>
 
             {/* Search + Menu */}
-            <div className="w-full h-15 mt-5 border-zinc-500 flex items-center px-3">
+            <div className="w-full h-15 mt-2 mb-1.4 border-zinc-500 flex items-center px-3">
                <div ref={menuRef}>
                   <img
                      src="/assets/menu.svg"
@@ -600,19 +631,19 @@ const Chat = () => {
                </div>
 
                <div className="relative w-full">
-                  <img src="/assets/search.svg" className="w-8 absolute left-4 top-1/2 -translate-y-1/2 opacity-70" alt="" />
+                  <img src="/assets/search.svg" className="w-8 absolute left-4 top-6.5 -translate-y-1/2 opacity-70" alt="" />
                   <input
                      type="text"
                      placeholder="Search"
                      value={search}
                      onChange={e => setSearch(e.target.value)}
-                     className="bg-[#30302e] text-white h-13 w-full p-2 pl-15 rounded-xl focus:outline-none"
+                     className="bg-[#30302e] mb-2 text-white h-13 w-full p-2 pl-15 rounded-xl focus:outline-none"
                   />
                </div>
             </div>
 
             {/* Conversation List */}
-            <div className="p-3 h-full overflow-y-scroll scrollbar">
+            <div className="p-3 flex-1 min-h-0 overflow-y-auto scrollbar" style={{ WebkitOverflowScrolling: "touch" }}>
                {loadingConvs ? (
                   <p className="text-zinc-500 text-md text-center mt-6">Loading Conversations...</p>
                ) : filteredConversations.length === 0 && search ? (
@@ -646,7 +677,8 @@ const Chat = () => {
          {/* Right Side */}
          <div className={`bg-[url(/assets/doodle.jpg)] bg-cover bg-center bg-no-repeat absolute md:relative top-0 right-0 h-full border border-zinc-800 text-white flex flex-col w-full md:flex-1 md:min-w-0 overflow-hidden
    transform transition-transform duration-300 ease-in-out
-   ${activConv ? "translate-x-0" : "translate-x-full md:translate-x-0"} z-10`}>
+   ${activConv ? "translate-x-0" : "translate-x-full md:translate-x-0"} z-10`}
+   style={{ height: `${viewportHeight}px` }}>
             <div className="absolute inset-0 bg-black/80 z-0" />
 
             {/* Top navbar */}
@@ -671,7 +703,7 @@ const Chat = () => {
             {/* Message Box */}
             {loadingMsgs ? (
                <div className="text-zinc-500 w-full h-auto text-2xl text-center flex-1 z-10 pt-20">Loading users...</div>
-            ) : <div className="w-full h-auto flex-1 z-10 p-4 overflow-y-scroll scrollbar" style={{ overscrollBehavior: "none" }}>
+            ) : <div className="w-full h-auto flex-1 min-h-0 z-10 p-4 overflow-y-auto scrollbar no-overscroll" style={{ WebkitOverflowScrolling: "touch" }}>
                {messages.map((message) => (
                   <MessagePill
                      key={message._id}
@@ -693,7 +725,9 @@ const Chat = () => {
             </div>}
 
             {/* Input */}
-            <div className={`border-t w-full h-15 border-zinc-800 flex justify-center items-center transform transition-all duration-300 ease-out ${activConv ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0 pointer-events-none"}`}>
+            <div className={`border-t w-full flex-shrink-0 border-zinc-800 flex justify-center items-center py-2 transform transition-all duration-300 ease-out ${activConv ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0 pointer-events-none"}`}
+               style={{ zIndex: 20 }}
+            >
                <div className="relative w-[80%]">
                   <img src="/assets/clip.svg" className="w-6 absolute left-4 top-1/2 -translate-y-1/2 opacity-70 active:scale-75 transition-all hover:scale-120" alt="" />
                   <input
@@ -704,16 +738,21 @@ const Chat = () => {
                      onChange={(e) => setcurrMessage(e.target.value)}
                      onKeyDown={handleKeyDown}
                      ref={inputRef}
+                     enterKeyHint="send"
+                     autoComplete="off"
                   />
                </div>
-               <div onClick={handleSend} className={`h-11 w-11 ml-1 bg-[#30302e] relative rounded-full
+               <div
+                  onMouseDown={(e) => { e.preventDefault(); handleSend(); }}
+                  onTouchEnd={(e) => { e.preventDefault(); handleSend(); }}
+                  className={`h-11 w-11 ml-1 bg-[#30302e] relative rounded-full flex-shrink-0
                   hover:bg-[#2d2d2d] hover:cursor-pointer
                 `}>
 
 
                   <img
                      src="/assets/send.png"
-                     className={`w-7 absolute transform transition-all duration-150 ease-in-out
+                     className={`w-7 absolute transform transition-all duration-150 ease-in-out pointer-events-none
                         
                      ${activeSend ? "rotate-45 left-[4px] top-[8px]" : "rotate-0 left-[7px] top-[11px]"}
                      `}

@@ -9,15 +9,24 @@
   --font-avatar: "Fjalla One", ui-sans-serif, system-ui, sans-serif;
 }
 
+:root {
+   --app-height: 100dvh;
+}
+
 html, body {
-   overscroll-behavior: none;
    height: 100%;
+   margin: 0;
+   padding: 0;
 }
 
 html, body, #root {
    height: 100%;
-   overscroll-behavior: none;
    background-color: #000000;
+}
+
+/* Only apply overscroll containment on inner scroll containers, not on html/body */
+.no-overscroll {
+   overscroll-behavior: contain;
 }
 
 
