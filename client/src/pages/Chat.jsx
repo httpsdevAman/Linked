@@ -259,8 +259,9 @@ const Chat = () => {
    const [typingUsers, setTypingUsers] = useState(new Set());
    const chatContainerRef = useRef(null);
 
-   // Track visual viewport height to handle mobile keyboard open/close
+   // Track visual viewport height + offset to handle mobile keyboard open/close
    const [viewportHeight, setViewportHeight] = useState(window.visualViewport?.height || window.innerHeight);
+   const [viewportOffset, setViewportOffset] = useState(0);
 
    useEffect(() => {
       const vv = window.visualViewport;
@@ -268,6 +269,7 @@ const Chat = () => {
 
       const handleResize = () => {
          setViewportHeight(vv.height);
+         setViewportOffset(vv.offsetTop);
       };
 
       vv.addEventListener("resize", handleResize);
@@ -601,8 +603,14 @@ const Chat = () => {
    return (
       <div
          ref={chatContainerRef}
-         className="flex relative overflow-hidden"
-         style={{ height: `${viewportHeight}px` }}
+         className="flex overflow-hidden"
+         style={{
+            position: 'fixed',
+            top: `${viewportOffset}px`,
+            left: 0,
+            width: '100%',
+            height: `${viewportHeight}px`
+         }}
       >
          {/* Left Sidebar */}
          <div className={`absolute md:relative top-0 left-0 h-full border border-zinc-800 text-white bg-[#262624] flex flex-col w-full md:w-[30%] transform transition-transform duration-300 ease-in-out
