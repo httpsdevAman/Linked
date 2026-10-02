@@ -9,8 +9,9 @@ import convRoutes from "./routes/conversation.route.js"
 import messageRoutes from "./routes/message.route.js"
 import userRoutes from "./routes/user.route.js"
 import fileRoutes from './routes/files.route.js'
-import cors from "cors"
+import cors from "cors";
 import jwt from "jsonwebtoken";
+import path from "path";
 
 dotenv.config();
 
@@ -40,6 +41,12 @@ app.use('/api/conversations', convRoutes)
 app.use('/api/messages', messageRoutes)
 app.use('/api/file', fileRoutes)
 
+const __dirname = path.resolve();
+app.use(express.static(path.join(__dirname, "../client/dist")));
+
+app.get("*", (req, res) => {
+   res.sendFile(path.join(__dirname, "../client/dist/index.html"));
+});
 
 // This the the HTTP Only Server
 /* 
