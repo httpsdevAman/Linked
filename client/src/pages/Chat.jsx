@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, use } from "react";
 import { useAuth } from "../context/AuthContext";
 import { createConversation, getMessages, sendMessage, getConversations, getUsers, getOnlineUsers } from "../services/auth";
 import { socket } from "../services/socket";
@@ -259,34 +259,8 @@ const Chat = () => {
    const typingRef = useRef(false);             // Monitors if user is typing
    const typingTimeoutRef = useRef(null);       // Clear Timout Key-Down
    const [typingUsers, setTypingUsers] = useState(new Set());
-<<<<<<< HEAD
-   const chatContainerRef = useRef(null);
-
-   // Track visual viewport height + offset to handle mobile keyboard open/close
-   const [viewportHeight, setViewportHeight] = useState(window.visualViewport?.height || window.innerHeight);
-   const [viewportOffset, setViewportOffset] = useState(0);
-
-   useEffect(() => {
-      const vv = window.visualViewport;
-      if (!vv) return;
-
-      const handleResize = () => {
-         setViewportHeight(vv.height);
-         setViewportOffset(vv.offsetTop);
-      };
-
-      vv.addEventListener("resize", handleResize);
-      vv.addEventListener("scroll", handleResize);
-
-      return () => {
-         vv.removeEventListener("resize", handleResize);
-         vv.removeEventListener("scroll", handleResize);
-      };
-   }, []);
-=======
    const fileInputRef = useRef(null);
    const [files, setFiles] = useState([]);
->>>>>>> e863b1d (Added file sharing)
 
    // Get name from userId
    const getUserNameById = (userId) => {
@@ -310,24 +284,14 @@ const Chat = () => {
       setLoadingMsgs(false);
    };
 
-<<<<<<< HEAD
-   const handleSend = useCallback(async () => {
-      if (!currMessage.trim()) return;
-=======
    const handleSend = async () => {
       if (!currMessage.trim() && files.length === 0) return;
       console.log(files[0]);     // Here are the files
->>>>>>> e863b1d (Added file sharing)
 
       const messageContent = currMessage;
       const messageFiles = [...files]
       setcurrMessage(""); // Clear immediately
       setFiles([]);
-
-      // Re-focus input to keep mobile keyboard open
-      requestAnimationFrame(() => {
-         inputRef.current?.focus();
-      });
 
       const optimisticMsg = {
          _id: `temp-${Date.now()}`,
@@ -363,7 +327,7 @@ const Chat = () => {
          setcurrMessage(messageContent); // Restore on failure
          console.error(error.response?.data || error.message);
       }
-   }, [currMessage, activConv, user]);
+   };
 
    const handleKeyDown = (e) => {
       if (e.key === "Enter" && !e.shiftKey) {
@@ -620,21 +584,10 @@ const Chat = () => {
 
 
    return (
-      <div
-         ref={chatContainerRef}
-         className="flex overflow-hidden"
-         style={{
-            position: 'fixed',
-            top: `${viewportOffset}px`,
-            left: 0,
-            width: '100%',
-            height: `${viewportHeight}px`
-         }}
-      >
+      <div className="flex relative h-dvh overflow-hidden">
          {/* Left Sidebar */}
          <div className={`absolute md:relative top-0 left-0 h-full border border-zinc-800 text-white bg-[#262624] flex flex-col w-full md:w-[30%] transform transition-transform duration-300 ease-in-out
-         ${activConv ? "-translate-x-full md:translate-x-0" : "translate-x-0"} z-20`}
-         style={{ touchAction: "manipulation" }}>
+         ${activConv ? "-translate-x-full md:translate-x-0" : "translate-x-0"} z-20`}>
 
             <div className="text-7xl border-b text-center border-b-zinc-700 font-pacifico bg-linear-to-r from-green-400 via-blue-500 to-purple-600 p-4 bg-clip-text text-transparent select-none">
                Linked.
@@ -642,11 +595,7 @@ const Chat = () => {
 
             {/* Search + Menu */}
             <div className="w-full h-15 mt-2 mb-1.4 border-zinc-500 flex items-center px-3">
-<<<<<<< HEAD
-               <div ref={menuRef} className="relative z-30">
-=======
                <div ref={menuRef}>
->>>>>>> e863b1d (Added file sharing)
                   <img
                      src="/assets/menu.svg"
                      onClick={() => toggleMenu(!menu)}
@@ -674,7 +623,7 @@ const Chat = () => {
             </div>
 
             {/* Conversation List */}
-            <div className="p-3 flex-1 min-h-0 overflow-y-auto scrollbar" style={{ WebkitOverflowScrolling: "touch" }}>
+            <div className="p-3 h-full overflow-y-scroll scrollbar">
                {loadingConvs ? (
                   <p className="text-zinc-500 text-md text-center mt-6">Loading Conversations...</p>
                ) : filteredConversations.length === 0 && search ? (
@@ -708,8 +657,7 @@ const Chat = () => {
          {/* Right Side */}
          <div className={`bg-[url(/assets/doodle.jpg)] bg-cover bg-center bg-no-repeat absolute md:relative top-0 right-0 h-full border border-zinc-800 text-white flex flex-col w-full md:flex-1 md:min-w-0 overflow-hidden
    transform transition-transform duration-300 ease-in-out
-   ${activConv ? "translate-x-0" : "translate-x-full md:translate-x-0"} z-10`}
-   style={{ height: `${viewportHeight}px` }}>
+   ${activConv ? "translate-x-0" : "translate-x-full md:translate-x-0"} z-10`}>
             <div className="absolute inset-0 bg-black/80 z-0" />
 
             {/* Top navbar */}
@@ -734,7 +682,7 @@ const Chat = () => {
             {/* Message Box */}
             {loadingMsgs ? (
                <div className="text-zinc-500 w-full h-auto text-2xl text-center flex-1 z-10 pt-20">Loading users...</div>
-            ) : <div className="w-full h-auto flex-1 min-h-0 z-10 p-4 overflow-y-auto scrollbar no-overscroll" style={{ WebkitOverflowScrolling: "touch" }}>
+            ) : <div className="w-full h-auto flex-1 z-10 p-4 overflow-y-scroll scrollbar" style={{ overscrollBehavior: "none" }}>
                {messages.map((message) => (
                   <MessagePill
                      key={message._id}
@@ -794,9 +742,7 @@ const Chat = () => {
             </div>}
 
             {/* Input */}
-            <div className={`border-t w-full flex-shrink-0 border-zinc-800 flex justify-center items-center py-2 transform transition-all duration-300 ease-out ${activConv ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0 pointer-events-none"}`}
-               style={{ zIndex: 20 }}
-            >
+            <div className={`border-t w-full h-15 border-zinc-800 flex justify-center items-center transform transition-all duration-300 ease-out ${activConv ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0 pointer-events-none"}`}>
                <div className="relative w-[80%]">
                   <input type="file" multiple className="hidden" ref={fileInputRef} onChange={(e) => setFiles(prev => [...prev, ...e.target.files])} />
                   <img src="/assets/clip.svg" alt="Attach file" onClick={() => fileInputRef.current?.click()} className="w-6 absolute left-4 top-1/2 -translate-y-1/2 opacity-70 active:scale-75 transition-all hover:scale-120" />
@@ -808,21 +754,16 @@ const Chat = () => {
                      onChange={(e) => setcurrMessage(e.target.value)}
                      onKeyDown={handleKeyDown}
                      ref={inputRef}
-                     enterKeyHint="send"
-                     autoComplete="off"
                   />
                </div>
-               <div
-                  onMouseDown={(e) => { e.preventDefault(); handleSend(); }}
-                  onTouchEnd={(e) => { e.preventDefault(); handleSend(); }}
-                  className={`h-11 w-11 ml-1 bg-[#30302e] relative rounded-full flex-shrink-0
+               <div onClick={handleSend} className={`h-11 w-11 ml-1 bg-[#30302e] relative rounded-full
                   hover:bg-[#2d2d2d] hover:cursor-pointer
                 `}>
 
 
                   <img
                      src="/assets/send.png"
-                     className={`w-7 absolute transform transition-all duration-150 ease-in-out pointer-events-none
+                     className={`w-7 absolute transform transition-all duration-150 ease-in-out
                         
                      ${activeSend ? "rotate-45 left-[4px] top-[8px]" : "rotate-0 left-[7px] top-[11px]"}
                      `}

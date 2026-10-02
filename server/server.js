@@ -1,8 +1,6 @@
 import express from "express";
 import { Server } from 'socket.io'
 import http from "http";
-import path from "path";
-import { fileURLToPath } from "url";
 import { connectDB } from "./config/db.js";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
@@ -19,12 +17,7 @@ dotenv.config();
 const port = process.env.PORT || 5000;
 const app = express();
 
-<<<<<<< HEAD
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-=======
 app.use(express.static('public'));
->>>>>>> e863b1d (Added file sharing)
 
 // Middleware
 app.use(express.json());
@@ -46,21 +39,6 @@ app.use("/api/users", userRoutes)
 app.use('/api/conversations', convRoutes)
 app.use('/api/messages', messageRoutes)
 app.use('/api/file', fileRoutes)
-
-// Serve frontend in production (single-service deployment)
-if (process.env.NODE_ENV === "production") {
-   const clientDist = path.join(__dirname, "../client/dist");
-   app.use(express.static(clientDist));
-
-   // SPA fallback — any non-API GET request serves index.html
-   app.use((req, res, next) => {
-      if (req.method === "GET" && !req.path.startsWith("/api")) {
-         res.sendFile(path.join(clientDist, "index.html"));
-      } else {
-         next();
-      }
-   });
-}
 
 
 // This the the HTTP Only Server
