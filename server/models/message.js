@@ -16,9 +16,27 @@ const messageSchema = new mongoose.Schema(
 
         content: {
             type: String,
-            required: true,
-            trim: true
+            trim: true,
+            default: ""
         },
+
+        attachments: [
+            {
+                url: {
+                    type: String,
+                    required: true
+                },
+                fileType: {
+                    type: String
+                },
+                fileName: {
+                    type: String
+                },
+                fileSize: {
+                    type: Number
+                }
+            }
+        ],
 
         readBy: [
             {
@@ -29,6 +47,14 @@ const messageSchema = new mongoose.Schema(
     },
     { timestamps: true }
 );
+
+messageSchema.pre('save', async function () {
+    if (!this.content && (!this.attachments || this.attachments.length === 0)) {
+        throw new Error(
+            'A message must contain either text content or an attachment.'
+        );
+    }
+});
 
 const Message = mongoose.model("Message", messageSchema);
 export default Message;

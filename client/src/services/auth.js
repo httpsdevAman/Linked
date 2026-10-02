@@ -37,8 +37,12 @@ export const getConversations = async () => {
    return API.get("/conversations");
 }
 
-export const sendMessage = async (messData) => {
-   return API.post("/messages", messData);
+export const sendMessage = async ({ convID, content, files }) => {
+   const formData = new FormData();
+   formData.append("convID", convID);
+   formData.append("content", content);
+   files.forEach(file => formData.append("files", file));
+   return API.post("/messages", formData);
 }
 
 export const getMessages = async (convID) => {

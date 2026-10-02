@@ -10,6 +10,7 @@ import authRoutes from "./routes/auth.route.js"
 import convRoutes from "./routes/conversation.route.js"
 import messageRoutes from "./routes/message.route.js"
 import userRoutes from "./routes/user.route.js"
+import fileRoutes from './routes/files.route.js'
 import cors from "cors"
 import jwt from "jsonwebtoken";
 
@@ -18,8 +19,12 @@ dotenv.config();
 const port = process.env.PORT || 5000;
 const app = express();
 
+<<<<<<< HEAD
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+=======
+app.use(express.static('public'));
+>>>>>>> e863b1d (Added file sharing)
 
 // Middleware
 app.use(express.json());
@@ -40,6 +45,7 @@ app.use('/api/auth', authRoutes)
 app.use("/api/users", userRoutes)
 app.use('/api/conversations', convRoutes)
 app.use('/api/messages', messageRoutes)
+app.use('/api/file', fileRoutes)
 
 // Serve frontend in production (single-service deployment)
 if (process.env.NODE_ENV === "production") {

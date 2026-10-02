@@ -232,6 +232,8 @@ const CreateConversationModal = ({ showCreateModal, onClose, onCreated }) => {
    );
 };
 
+
+
 const Chat = () => {
    const { user, logout } = useAuth();
 
@@ -257,6 +259,7 @@ const Chat = () => {
    const typingRef = useRef(false);             // Monitors if user is typing
    const typingTimeoutRef = useRef(null);       // Clear Timout Key-Down
    const [typingUsers, setTypingUsers] = useState(new Set());
+<<<<<<< HEAD
    const chatContainerRef = useRef(null);
 
    // Track visual viewport height + offset to handle mobile keyboard open/close
@@ -280,6 +283,10 @@ const Chat = () => {
          vv.removeEventListener("scroll", handleResize);
       };
    }, []);
+=======
+   const fileInputRef = useRef(null);
+   const [files, setFiles] = useState([]);
+>>>>>>> e863b1d (Added file sharing)
 
    // Get name from userId
    const getUserNameById = (userId) => {
@@ -303,11 +310,19 @@ const Chat = () => {
       setLoadingMsgs(false);
    };
 
+<<<<<<< HEAD
    const handleSend = useCallback(async () => {
       if (!currMessage.trim()) return;
+=======
+   const handleSend = async () => {
+      if (!currMessage.trim() && files.length === 0) return;
+      console.log(files[0]);     // Here are the files
+>>>>>>> e863b1d (Added file sharing)
 
       const messageContent = currMessage;
+      const messageFiles = [...files]
       setcurrMessage(""); // Clear immediately
+      setFiles([]);
 
       // Re-focus input to keep mobile keyboard open
       requestAnimationFrame(() => {
@@ -317,6 +332,10 @@ const Chat = () => {
       const optimisticMsg = {
          _id: `temp-${Date.now()}`,
          content: messageContent,
+         attachments: messageFiles.map(file => ({
+            fileName: file.name,
+            url: URL.createObjectURL(file)
+         })),
          sender: { _id: user._id, name: user.name },
          conversation: activConv,
          createdAt: new Date().toISOString(),
@@ -327,7 +346,7 @@ const Chat = () => {
          setActiveSend(true);
          setTimeout(() => setActiveSend(false), 150);
 
-         const res = await sendMessage({ convID: activConv, content: messageContent });
+         const res = await sendMessage({ convID: activConv, content: messageContent, files });
 
          // Replace optimistic with real message
          // setMessages(prev => prev.map(m => m._id === optimisticMsg._id ? res.data : m));
@@ -623,7 +642,11 @@ const Chat = () => {
 
             {/* Search + Menu */}
             <div className="w-full h-15 mt-2 mb-1.4 border-zinc-500 flex items-center px-3">
+<<<<<<< HEAD
                <div ref={menuRef} className="relative z-30">
+=======
+               <div ref={menuRef}>
+>>>>>>> e863b1d (Added file sharing)
                   <img
                      src="/assets/menu.svg"
                      onClick={() => toggleMenu(!menu)}
@@ -716,6 +739,7 @@ const Chat = () => {
                   <MessagePill
                      key={message._id}
                      message={message.content}
+                     attachments={message.attachments}
                      sender={message.sender.name}
                      time={formatMessageTime(message.createdAt).time}
                      isOwn={message.sender._id === user._id}
@@ -732,12 +756,50 @@ const Chat = () => {
                <div ref={scrollRef} />
             </div>}
 
+            {<div className={`absolute bottom-17 left-21 z-50 w-64 rounded-2xl border border-blue-200 bg-[#6c93ff] p-2 shadow-xl backdrop-blur-sm ${files.length > 0 ? 'opacity-100 max-h-60' : 'opacity-0 pointer-events-none max-h-0'} transition-all duration-200 ease-in-out`}>
+               <div className="mb-2 px-2 text-xs font-semibold uppercase tracking-wide text-white/80">
+                  Attached Files
+               </div>
+
+               <div className="max-h-48 space-y-1.5 overflow-y-auto pr-1">
+
+                  {
+                     files.map((file) => (
+                        <div className="flex w-full items-center gap-2 rounded-lg bg-white px-3 py-2 shadow-sm transition hover:bg-blue-50">
+
+                           {/* File icon */}
+                           <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-blue-100 text-[#1e3a8a]">
+                             <img src="/assets/file-ico.png" className="h-5" alt="" />
+                           </div>
+
+                           {/* File name */}
+                           <span className="min-w-0 flex-1 truncate text-sm font-medium text-[#1e3a8a]">
+                              {file.name}
+                           </span>
+
+                           {/* Remove button */}
+                           <button onClick={() => setFiles(files.filter((f) => f !== file))}
+                              type="button"
+                              className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-gray-400 transition hover:bg-red-100 hover:text-red-500"
+                              title="Remove file"
+                           >
+                              ×
+                           </button>
+                        </div>
+                     ))
+                  }
+
+
+               </div>
+            </div>}
+
             {/* Input */}
             <div className={`border-t w-full flex-shrink-0 border-zinc-800 flex justify-center items-center py-2 transform transition-all duration-300 ease-out ${activConv ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0 pointer-events-none"}`}
                style={{ zIndex: 20 }}
             >
                <div className="relative w-[80%]">
-                  <img src="/assets/clip.svg" className="w-6 absolute left-4 top-1/2 -translate-y-1/2 opacity-70 active:scale-75 transition-all hover:scale-120" alt="" />
+                  <input type="file" multiple className="hidden" ref={fileInputRef} onChange={(e) => setFiles(prev => [...prev, ...e.target.files])} />
+                  <img src="/assets/clip.svg" alt="Attach file" onClick={() => fileInputRef.current?.click()} className="w-6 absolute left-4 top-1/2 -translate-y-1/2 opacity-70 active:scale-75 transition-all hover:scale-120" />
                   <input
                      type="text"
                      placeholder="Message..."
